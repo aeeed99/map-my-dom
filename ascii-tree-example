@@ -1,0 +1,26 @@
+html
+|
+|
++--head
+|  |
+|  meta
+|  |
+|  script~*src='/bootstrap.css'*
+|
+| 
++--BODY
+   |
+   H1 "Welcome to my page"
+   |
+   +--DIV~#id~.class
+      |
+      |
+      +--DIV/#inner-div
+         |
+         p~"this is the content
+         :  of the paragraph, it
+         :  can have three lines..."
+         |
+         |
+         h2   
+ 
