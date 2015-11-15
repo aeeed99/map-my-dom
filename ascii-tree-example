@@ -1,26 +1,43 @@
-html
+html(itemtype="....org/WebPage")
 |
 |
 +--head
 |  |
-|  meta
+|  meta(content="search the world's...")
 |  |
-|  script~*src='/bootstrap.css'*
-|
+|  meta(content="noodp")
+|  |
+|  link(href="..eg_lodp.ico")
+|  |
+|  script~function() {window.google={
+|  :      {kEI:'d7REVvq9LIGV-QG_jpnwC
+|  :      g',kEXPI:'3310783, //...
+|  *
+|  
+|  
 | 
-+--BODY
++--body
    |
-   H1 "Welcome to my page"
+   +--div#doc-info
+   |  *
    |
-   +--DIV~#id~.class
+   +--div#cst
+   |  *
+   |
+   style
+   |
+   +--div#db
       |
-      |
-      +--DIV/#inner-div
+      +--div#gbw
          |
-         p~"this is the content
-         :  of the paragraph, it
-         :  can have three lines..."
-         |
-         |
-         h2   
- 
+         +--div(style="top:0,left:0...")
+            |
+            +--div.[gb_La +4]
+               |
+               +--div.[gb_7d]
+                  |
+                  span.[gb_La&gb_R]
+                  :   ~"Nick"
+									|
+                  |
+                  +--div
