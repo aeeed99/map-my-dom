@@ -103,9 +103,10 @@ describe("test parse function", function(){
 describe("children", function(){
   var parser = new HTMLParser();
   var parsedBody = parser.parse("<div><h1>Text</h1></div>");
+  console.log("PARSED", parsedBody);
   it("are put into a parent's array", function(){
     expect(parsedBody.length).toEqual(1);
-    expect(typeof parsedBody[0].children).toEqual('array');
-    expect(parsedBody[0].children) 
+    expect(Array.isArray(parsedBody[0].children)).toEqual(true);
+    expect(parsedBody[0].children.length).toEqual(1);
   });
 });

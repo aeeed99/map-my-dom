@@ -72,17 +72,17 @@ var HTMLParser = function() {};
 HTMLParser.prototype.parse = masterParser;
 
 function masterParser(str){
-  if(!str) return []; 
+  if(!str) return [];
   
   var htmlTree =[];
   var tagsArr = parse(str);
   console.log(tagsArr);
   
-  //tagsArr.forEach(function(tagStr, idx, arr){
+  //SINGLE-TAG DATA PARSING
   for(var i = 0; i < tagsArr.length; i++){
     var tagName = tagsArr[i].match(/<([\w\d]+)/)[1];
     var tagNameArr = tagsArr[i].split(">");
-    var tagInfo = tagNameArr[0]
+    var tagInfo = tagNameArr[0].replace("<","");
     var tagBody = tagNameArr[1];
     var attrObj = {};
     
@@ -96,15 +96,21 @@ function masterParser(str){
       attrObj[key] = value;
       
       //find if there are children
+    });
       var children = [];
       while(Array.isArray(tagsArr[i+1])){
-        children.push(tagsArr[i+1]);
+        children.push(tagsArr[i+1][0]);
+        i++;
       }
-    });
-    //create the tag with all info
-    htmlTree.push(new Tag(tagName, tagBodyLines, Boolean(isBlock[tagName]), attrObj));
+      //create the tag with all info
+      var createdTag = new Tag(tagName, tagBodyLines, Boolean(isBlock[tagName]), attrObj);
+      //add any queued children
+      for(var j = 0; j < (children||[]).length; j++){
+        createdTag.children.push(masterParser(children[j]));
+      }
+      htmlTree.push(createdTag);
   };
-    //push to master tags array
+  //push to master tags array
   return htmlTree;
 };
 
