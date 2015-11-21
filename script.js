@@ -1,6 +1,6 @@
 function parse(str){
     var result = [];
-    var arr = str.split("</").filter(function(i){return !!i})
+    var arr = str.split("</").map(function(i){return (i.match(/<.*/)||[null])[0]}).filter(function(i){return !!i});
     console.log(arr);
     arr.forEach(function(content){
         var opening = content.search(/.<[^\/]/)+1;
@@ -12,6 +12,8 @@ function parse(str){
     });
     return result.filter(function(i){return /^</.test(i)});
 }
+
+var s = "<span></span><span></span>";
 
 //CONSTANTS LIBRARY
 var isBlock = {
@@ -66,32 +68,42 @@ Tag.prototype.addChild = function(child) {
   else throw new Error("Cannot add children to inline objects (set isBlock to 'true')");
 }
 
-var HTMLParser = function () {};
-HTMLParser.prototype.parse = function (str){
-  if(!str) return [];
+var HTMLParser = function() {};
+HTMLParser.prototype.parse = masterParser;
+
+function masterParser(str){
+  if(!str) return []; 
   
   var htmlTree =[];
-  var tagsArr = str.match(/<[^/][^>]*>[^<]*/g);
+  var tagsArr = parse(str);
+  console.log(tagsArr);
   
-  tagsArr.forEach(function(tagStr){
-    var tagName = tagStr.match(/<([\w\d]+)/)[1];
-    var tagNameArr = tagStr.split(">");
+  //tagsArr.forEach(function(tagStr, idx, arr){
+  for(var i = 0; i < tagsArr.length; i++){
+    var tagName = tagsArr[i].match(/<([\w\d]+)/)[1];
+    var tagNameArr = tagsArr[i].split(">");
     var tagInfo = tagNameArr[0]
     var tagBody = tagNameArr[1];
     var attrObj = {};
     
     //Parse all Body lines (max 3) into an array (35 chars max)
-    var tagBodyLines = lineify(tagBody).slice(0,3);
+    var tagBodyLines = lineify(tagBody).slice(0,3); //TODO: Do we still need slice?
     
     //Parse all Tag Attributes into an object
     tagInfo.split(" ").slice(1).forEach(function(attr){
       var key = attr.split("=")[0];
       var value = attr.split("=")[1].match(/[\d\w]+/)[0];
       attrObj[key] = value;
+      
+      //find if there are children
+      var children = [];
+      while(Array.isArray(tagsArr[i+1])){
+        children.push(tagsArr[i+1]);
+      }
     });
     //create the tag with all info
     htmlTree.push(new Tag(tagName, tagBodyLines, Boolean(isBlock[tagName]), attrObj));
-  });
+  };
     //push to master tags array
   return htmlTree;
 };

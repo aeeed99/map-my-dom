@@ -1,4 +1,4 @@
-xdescribe("The Tag class", function(){
+describe("The Tag class", function(){
   
   it("should be instantiated with a tagName, body, block, and attribute class", function(){
     var newTag = new Tag('div', 'body text', true)
@@ -33,7 +33,7 @@ xdescribe("The Tag class", function(){
   });
 });
 
-xdescribe("The html tag parser", function() {
+describe("The html tag parser", function() {
   var parser = new HTMLParser();
   it("returns an epty array if there's nothing to pares", function(){
     expect(parser.parse('')).toEqual([]);
