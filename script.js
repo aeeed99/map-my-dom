@@ -1,7 +1,7 @@
 function parse(str){
-    debugger;
     var result = [];
-    var arr = str.split(/<\/.*>/).filter(function(i){return !!i});
+    var arr = str.split("</").filter(function(i){return !!i})
+    console.log(arr);
     arr.forEach(function(content){
         var opening = content.search(/.<[^\/]/)+1;
         if(!opening) result.push(content);
@@ -10,7 +10,7 @@ function parse(str){
             result.push(parse(content.slice(opening)));
         }
     });
-    return result;
+    return result.filter(function(i){return /^</.test(i)});
 }
 
 //CONSTANTS LIBRARY
