@@ -1,0 +1,1 @@
+Maybe we can seperate everything that starts with a '<' and ends with a '</', triggering a recursive event anytime there is another opening tag.

@@ -13,9 +13,9 @@ html(itemtype="....org/WebPage")
 |  :      {kEI:'d7REVvq9LIGV-QG_jpnwC
 |  :      g',kEXPI:'3310783, //...
 |  *
-|  
-|  
-| 
+|
+|
+|
 +--body
    |
    +--div#doc-info
@@ -38,6 +38,6 @@ html(itemtype="....org/WebPage")
                   |
                   span.[gb_La&gb_R]
                   :   ~"Nick"
-									|
+                  |
                   |
                   +--div
