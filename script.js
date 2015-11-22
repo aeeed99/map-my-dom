@@ -136,14 +136,32 @@ function lineify(string, max, _n){
   }
 }
 
-function treeify(arr){
-   var result = "";
+function treeify(arr, _level){
+   console.log("ARR in this recurrsion", arr);
+   var level = _level || 0;
+   var result = [];
    arr.forEach(function(tag, i, a){
-      result += tag.tagName + "\n";
-      result += i+1 !== a.length ? "|\n|\n" : "";
+      if((tag.children||[]).length){
+         console.log(tag.children);
+         result.push("+---" + tag.tagName);
+         result.push("|" + repeatStr("   |", level));
+         treeify(result.children);
+      }else{
+         result.push(tag.tagName);
+         result.push("|" + repeatStr("   |", level));
+         //if (i+1 !== a.length) result.push("|");
+      }
    });
-   return result;
+   console.log(result);
+   return result.filter(function(item){return !!item}).join("\n");
 }
-function htmlToTree(str){
+function displayTree(arr){
    console.log(treeify(arr));
+}
+function repeatStr(str, n){
+   var result = "";
+   for(var i = 0; i < n; i++){
+      result += str;
+   }
+   return result;
 }
