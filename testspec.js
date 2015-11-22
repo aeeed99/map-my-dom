@@ -60,10 +60,10 @@ describe("Parsing attributes & content", function() {
   var parsedPTagLong = parser.parse(pTagLong)[0];
   
   describe("attributes", function(){
-    it("adds an attributes attribute which is an object",function(){
+    xit("adds an attributes attribute which is an object",function(){
       expect(typeof parsedDivTag.attributes).toEqual('object');
     });
-    it("adds takes attributes and adds them as properties to the body object.", function() {
+    xit("adds takes attributes and adds them as properties to the body object.", function() {
       expect(parsedDivTag.attributes.id).toEqual('divId');
       expect(parsedDivTag.attributes.class).toEqual('divClass');
     });

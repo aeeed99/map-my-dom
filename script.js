@@ -92,7 +92,7 @@ function masterParser(str){
     //Parse all Tag Attributes into an object
     tagInfo.split(" ").slice(1).forEach(function(attr){
       var key = attr.split("=")[0];
-      var value = attr.split("=")[1].match(/[\d\w]+/)[0];
+      var value = attr.split("=")[1].match(/[^\s]+/)[0];
       attrObj[key] = value;
       
       //find if there are children
@@ -113,7 +113,6 @@ function masterParser(str){
   //push to master tags array
   return htmlTree;
 };
-
 function lineify(string, max, _n){
   var count = _n || 1;
   while(string[0] === " "){
@@ -135,4 +134,16 @@ function lineify(string, max, _n){
       }
     }
   }
+}
+
+function treeify(arr){
+   var result = "";
+   arr.forEach(function(tag, i, a){
+      result += tag.tagName + "\n";
+      result += i+1 !== a.length ? "|\n|\n" : "";
+   });
+   return result;
+}
+function htmlToTree(str){
+   console.log(treeify(arr));
 }
