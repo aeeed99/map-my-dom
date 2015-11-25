@@ -107,19 +107,12 @@ function treeify(arr, useParser, _level){
     var level = _level || 0;
     var result = [];
     
-    arr.forEach(function(tag, i, a){
-       if((tag.children||[]).length){
-          result.push("+---" + tag.tagName);
-          level++;
-          result.push("|" + repeatStr("   |", level));
-          treeify(result.children);
-       }else{
-          result.push(tag.tagName);
-          result.push("|" + repeatStr("   |", false, level));
-          //if (i+1 !== a.length) result.push("|");
-       }
-    });
-    console.log(result);
+    for(var i = 0; i < arr.length; i++){
+        var tag = arr[i];
+        result.push(tag.tagName);
+        result.push("|" + repeatStr("  |", level),"|" + repeatStr("  |", level));
+    }
+    console.log(result)
     return result.filter(function(item){return !!item}).join("\n");
 }
 
