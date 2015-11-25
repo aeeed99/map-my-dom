@@ -1,5 +1,5 @@
 function parseStr(str){
-    var arr = htmlToArray(str);
+    var arr = typeof str === 'string' ? htmlToArray(str): str;
     var result = [];
     for(var i = 0; i < arr.length; i++){
         //Open Tag Case:
@@ -10,7 +10,7 @@ function parseStr(str){
         //Closing Tag Case:
         else {
             if(/^<\//.test(arr[i])) continue;
-            var childArr = parse(arr.slice(i));
+            var childArr = parseStr(arr.slice(i));
             result.push(childArr);
             i += (childArr.length);
         }
@@ -44,6 +44,7 @@ var HTMLParser = function() {};
 HTMLParser.prototype.parse = masterParser;
 
 function masterParser(str){
+    debugger;
   if(!str) return [];
   
   var htmlTree =[];
@@ -66,8 +67,8 @@ function masterParser(str){
       var value = attr.split("=")[1].match(/[^\s]+/)[0];
       attrObj[key] = value;
       
-      //find if there are children
     });
+      //find if there are children
       var children = [];
       while(Array.isArray(tagsArr[i+1])){
         children.push(tagsArr[i+1][0]);
@@ -79,6 +80,7 @@ function masterParser(str){
       for(var j = 0; j < (children||[]).length; j++){
         createdTag.children.push(masterParser(children[j])[0]);
       }
+      
       htmlTree.push(createdTag);
   };
   //push to master tags array
