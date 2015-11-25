@@ -44,11 +44,11 @@ var HTMLParser = function() {};
 HTMLParser.prototype.parse = masterParser;
 
 function masterParser(str){
-    debugger;
   if(!str) return [];
   
   var htmlTree =[];
-  var tagsArr = parseStr(str);
+    //array/string failsafe:
+  var tagsArr = typeof str === 'string' ? parseStr(str) : /*str is actually arr*/str;
   
   //SINGLE-TAG DATA PARSING
   for(var i = 0; i < tagsArr.length; i++){
@@ -57,28 +57,20 @@ function masterParser(str){
     var tagInfo = tagNameArr[0].replace("<","");
     var tagBody = tagNameArr[1];
     var attrObj = {};
-    
     //Parse all Body lines (max 3) into an array (35 chars max)
     var tagBodyLines = lineify(tagBody).slice(0,3); //TODO: Do we still need slice?
-    
     //Parse all Tag Attributes into an object
     tagInfo.split(" ").slice(1).forEach(function(attr){
       var key = attr.split("=")[0];
       var value = attr.split("=")[1].match(/[^\s]+/)[0];
       attrObj[key] = value;
-      
     });
-      //find if there are children
-      var children = [];
-      while(Array.isArray(tagsArr[i+1])){
-        children.push(tagsArr[i+1][0]);
-        i++;
-      }
       //create the tag with all info
       var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
-      //add any queued children
-      for(var j = 0; j < (children||[]).length; j++){
-        createdTag.children.push(masterParser(children[j])[0]);
+
+      if(Array.isArray(tagsArr[i+1])){
+          createdTag.children = masterParser(tagsArr[i+1]);
+          i++;
       }
       
       htmlTree.push(createdTag);
@@ -110,20 +102,20 @@ function lineify(string, max, _n){
   }
 }
 
-function treeify(arr, _level){
-    console.log("ARR in this recurrsion", arr);
+function treeify(arr, useParser, _level){
+    if(useParser) arr = masterParser(arr);
     var level = _level || 0;
     var result = [];
     
     arr.forEach(function(tag, i, a){
        if((tag.children||[]).length){
-          console.log(tag.children);
           result.push("+---" + tag.tagName);
+          level++;
           result.push("|" + repeatStr("   |", level));
           treeify(result.children);
        }else{
           result.push(tag.tagName);
-          result.push("|" + repeatStr("   |", level));
+          result.push("|" + repeatStr("   |", false, level));
           //if (i+1 !== a.length) result.push("|");
        }
     });
@@ -131,8 +123,9 @@ function treeify(arr, _level){
     return result.filter(function(item){return !!item}).join("\n");
 }
 
-function displayTree(arr){
-   console.log(treeify(arr));
+function displayTree(arr, useParser){
+    arr = Array.isArray(arr) ? arr : parseStr(arr);
+   console.log(treeify(arr, useParser));
     //TODO: Once treeify is complete, this should be changed to send the text to a DOM element.
 }
 
