@@ -1,4 +1,5 @@
-function parse(arr){
+function parseStr(str){
+    var arr = htmlToArray(str);
     var result = [];
     for(var i = 0; i < arr.length; i++){
         //Open Tag Case:
@@ -25,45 +26,6 @@ function htmlToArray(str){
 
 var s = "<span></span><span></span>";
 
-//CONSTANTS LIBRARY
-var isBlock = {
-  address: true,
-  article: true,
-  aside: true,
-  blockquote: true,
-  canvas: true,
-  dd: true,
-  div: true,
-  dl: true,
-  fieldset: true,
-  figcaption: true,
-  figure: true,
-  footer: true,
-  form: true,
-  h1: true,
-  h2: true,
-  h3: true,
-  h4: true,
-  h5: true,
-  h6: true,
-  header: true,
-  hgroup: true,
-  hr: true,
-  li: true,
-  main: true,
-  nav: true,
-  noscript: true,
-  ol: true,
-  output: true,
-  p: true,
-  pre: true,
-  section: true,
-  table: true,
-  tfoot: true,
-  ul: true,
-  video: true
-}
-
 var Tag = function(tagName, body, isBlock, attributes){
   this.tagName = tagName;
   this.body = body;
@@ -85,7 +47,7 @@ function masterParser(str){
   if(!str) return [];
   
   var htmlTree =[];
-  var tagsArr = parse(str);
+  var tagsArr = parseStr(str);
   
   //SINGLE-TAG DATA PARSING
   for(var i = 0; i < tagsArr.length; i++){
@@ -112,7 +74,7 @@ function masterParser(str){
         i++;
       }
       //create the tag with all info
-      var createdTag = new Tag(tagName, tagBodyLines, Boolean(isBlock[tagName]), attrObj);
+      var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
       //add any queued children
       for(var j = 0; j < (children||[]).length; j++){
         createdTag.children.push(masterParser(children[j])[0]);
@@ -147,27 +109,29 @@ function lineify(string, max, _n){
 }
 
 function treeify(arr, _level){
-   console.log("ARR in this recurrsion", arr);
-   var level = _level || 0;
-   var result = [];
-   arr.forEach(function(tag, i, a){
-      if((tag.children||[]).length){
-         console.log(tag.children);
-         result.push("+---" + tag.tagName);
-         result.push("|" + repeatStr("   |", level));
-         treeify(result.children);
-      }else{
-         result.push(tag.tagName);
-         result.push("|" + repeatStr("   |", level));
-         //if (i+1 !== a.length) result.push("|");
-      }
-   });
-   console.log(result);
-   return result.filter(function(item){return !!item}).join("\n");
+    console.log("ARR in this recurrsion", arr);
+    var level = _level || 0;
+    var result = [];
+    
+    arr.forEach(function(tag, i, a){
+       if((tag.children||[]).length){
+          console.log(tag.children);
+          result.push("+---" + tag.tagName);
+          result.push("|" + repeatStr("   |", level));
+          treeify(result.children);
+       }else{
+          result.push(tag.tagName);
+          result.push("|" + repeatStr("   |", level));
+          //if (i+1 !== a.length) result.push("|");
+       }
+    });
+    console.log(result);
+    return result.filter(function(item){return !!item}).join("\n");
 }
 
 function displayTree(arr){
    console.log(treeify(arr));
+    //TODO: Once treeify is complete, this should be changed to send the text to a DOM element.
 }
 
 function repeatStr(str, n){
@@ -177,3 +141,14 @@ function repeatStr(str, n){
    }
    return result;
 }
+
+//Cases for testing:
+var baseCase="<div>Parent</div>";
+var baseCase2="<div>Parent</div><div>Parent</div><div>Parent</div>";
+var test = "<div>Parent<div>Child1</div><div>Child2></div></div>";
+var test2 = "<div>1</div><div>2<div>2.1</div><div>2.2<div>2.2.1</div></div><div>2.3</div></div><div>3</div>"
+
+var baseCaseA = parseStr(baseCase);
+var baseCase2A = parseStr(baseCase2);
+var testA = parseStr(test);
+var test2A = parseStr(test2);
