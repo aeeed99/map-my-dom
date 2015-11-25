@@ -12,17 +12,13 @@ html(itemtype="....org/WebPage")
 |  script~function() {window.google={
 |  :      {kEI:'d7REVvq9LIGV-QG_jpnwC
 |  :      g',kEXPI:'3310783, //...
-|  *
-|
 |
 |
 +--body
    |
    +--div#doc-info
-   |  *
    |
    +--div#cst
-   |  *
    |
    style
    |
@@ -38,6 +34,5 @@ html(itemtype="....org/WebPage")
                   |
                   span.[gb_La&gb_R]
                   :   ~"Nick"
-                  |
                   |
                   +--div

@@ -106,13 +106,14 @@ function masterParser(str){
       var createdTag = new Tag(tagName, tagBodyLines, Boolean(isBlock[tagName]), attrObj);
       //add any queued children
       for(var j = 0; j < (children||[]).length; j++){
-        createdTag.children.push(masterParser(children[j]));
+        createdTag.children.push(masterParser(children[j])[0]);
       }
       htmlTree.push(createdTag);
   };
   //push to master tags array
   return htmlTree;
 };
+
 function lineify(string, max, _n){
   var count = _n || 1;
   while(string[0] === " "){
@@ -155,9 +156,11 @@ function treeify(arr, _level){
    console.log(result);
    return result.filter(function(item){return !!item}).join("\n");
 }
+
 function displayTree(arr){
    console.log(treeify(arr));
 }
+
 function repeatStr(str, n){
    var result = "";
    for(var i = 0; i < n; i++){
