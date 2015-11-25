@@ -15,12 +15,12 @@ function parse(str){
     return result.filter(function(i){return /^</.test(i)});
 }
 
-function htmlToArray(str){
-    var arr = str.match(/<\/[^>]+>|<[^>]*>[^<]*/g).filter(function(i){
-        return !!i;
-    });
-    return arr;
-}
+//function htmlToArray(str){
+//    var arr = str.match(/<\/[^>]+>|<[^>]*>[^<]*/g).filter(function(i){
+//        return !!i;
+//    });
+//    return arr;
+//}
 function parse2(arr){
     var result = [];
     for(var i = 0; i < arr.length; i++){

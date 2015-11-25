@@ -1,16 +1,26 @@
-function parse(str){
+function parse(arr){
     var result = [];
-    var arr = str.split("</").map(function(i){return (i.match(/<.*/)||[null])[0]}).filter(function(i){return !!i});
-    console.log(arr);
-    arr.forEach(function(content){
-        var opening = content.search(/.<[^\/]/)+1;
-        if(!opening) result.push(content);
-        else{
-            result.push(content.slice(0, opening));
-            result.push(parse(content.slice(opening)));
+    for(var i = 0; i < arr.length; i++){
+        //Open Tag Case:
+        if (i % 2 === 0){
+            if(/^<[^\/]/.test(arr[i])) result.push(arr[i]);
+            else return result;
         }
+        //Closing Tag Case:
+        else {
+            if(/^<\//.test(arr[i])) continue;
+            var childArr = parse(arr.slice(i));
+            result.push(childArr);
+            i += (childArr.length);
+        }
+    }
+    return result;
+}
+function htmlToArray(str){
+    var arr = str.match(/<\/[^>]+>|<[^>]*>[^<]*/g).filter(function(i){
+        return !!i;
     });
-    return result.filter(function(i){return /^</.test(i)});
+    return arr;
 }
 
 var s = "<span></span><span></span>";
@@ -76,7 +86,6 @@ function masterParser(str){
   
   var htmlTree =[];
   var tagsArr = parse(str);
-  console.log(tagsArr);
   
   //SINGLE-TAG DATA PARSING
   for(var i = 0; i < tagsArr.length; i++){
