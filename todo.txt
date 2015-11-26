@@ -1,0 +1,9 @@
+[ ] trailing branches are cleaned up
+    [ ] create a maxLevel that incriments in the root function, then itierate through each level, checking for beams in the corresponding position and breaking once all trailing beams are replaced.
+
+[ ] tag has a method that displays info (Tag.prototype.showInfo)
+    [ ] when invoked, it returns info to be displayed in the tree
+    [ ] this will replace the manually displaying .tagName, and automatically show that... and moar!!
+
+
+[X] treeify displays all children branches correctly;

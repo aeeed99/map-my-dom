@@ -1,4 +1,5 @@
 function parseStr(str){
+    //USED INSIDE MASTERPARSER TO CHANGE STRING INTO ARR FOR TAG PARSING.
     var arr = typeof str === 'string' ? htmlToArray(str): str;
     var result = [];
     for(var i = 0; i < arr.length; i++){
@@ -38,6 +39,11 @@ var Tag = function(tagName, body, isBlock, attributes){
 Tag.prototype.addChild = function(child) {
   if(this.children !== null) this.children.push(child);
   else throw new Error("Cannot add children to inline objects (set isBlock to 'true')");
+}
+Tag.prototype.showInfo = function() {
+    var result = "";
+    result += this.tagName + '~"' + this.body[0] + '"';
+    return result;
 }
 
 var HTMLParser = function() {};
@@ -102,18 +108,29 @@ function lineify(string, max, _n){
   }
 }
 
-function treeify(arr, useParser, _level){
-    if(useParser) arr = masterParser(arr);
+function treeify(arr, _level){
+//    if(useParser) arr = masterParser(arr); --to be removed; treeify should only be called with arrays of Tags already returned from masterParser
     var level = _level || 0;
     var result = [];
     
     for(var i = 0; i < arr.length; i++){
         var tag = arr[i];
-        result.push(tag.tagName);
-        result.push("|" + repeatStr("  |", level),"|" + repeatStr("  |", level));
+        if(tag.children.length){
+            result.push(repeatStr("|  ", level) + "+--" + tag.showInfo());
+            result.push("|" + repeatStr("  |", level+1), "|" + repeatStr("  |", level+1));
+            result = result.concat(treeify(tag.children, (level+1)));
+        } else {
+            result.push(repeatStr("|  ", level) + tag.showInfo());
+            result.push("|" + repeatStr("  |", level), "|" + repeatStr("  |", level));
+        }
     }
-    console.log(result)
-    return result.filter(function(item){return !!item}).join("\n");
+    for(var i = result.length - 1; i > 0; i--){
+        if(result[i][0] === "|") result[i] = result[i].slice(0,1).replace("|", "") + result[i].slice(1);
+        else break;
+    }
+    console.log(result);
+    result = result.filter(function(item){return !!item});
+    return _level ? result : result.join("\n");
 }
 
 function displayTree(arr, useParser){
@@ -136,7 +153,7 @@ var baseCase2="<div>Parent</div><div>Parent</div><div>Parent</div>";
 var test = "<div>Parent<div>Child1</div><div>Child2></div></div>";
 var test2 = "<div>1</div><div>2<div>2.1</div><div>2.2<div>2.2.1</div></div><div>2.3</div></div><div>3</div>"
 
-var baseCaseA = parseStr(baseCase);
-var baseCase2A = parseStr(baseCase2);
-var testA = parseStr(test);
-var test2A = parseStr(test2);
+var baseCaseA = masterParser(baseCase);
+var baseCase2A = masterParser(baseCase2);
+var testA = masterParser(test);
+var test2A = masterParser(test2);
