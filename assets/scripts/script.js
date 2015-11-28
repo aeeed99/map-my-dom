@@ -42,7 +42,7 @@ Tag.prototype.addChild = function(child) {
 }
 Tag.prototype.showInfo = function() {
     var result = "";
-    result += this.tagName + '~"' + this.body[0] + '"';
+    result += this.tagName + '~"' + this.body.join("\n") + '"';
     return result;
 }
 
@@ -50,39 +50,45 @@ var HTMLParser = function() {};
 HTMLParser.prototype.parse = masterParser;
 
 function masterParser(str){
-  if(!str) return [];
-  
-  var htmlTree =[];
-    //array/string failsafe:
-  var tagsArr = typeof str === 'string' ? parseStr(str) : /*str is actually arr*/str;
-  
-  //SINGLE-TAG DATA PARSING
-  for(var i = 0; i < tagsArr.length; i++){
-    var tagName = tagsArr[i].match(/<([\w\d]+)/)[1];
-    var tagNameArr = tagsArr[i].split(">");
-    var tagInfo = tagNameArr[0].replace("<","");
-    var tagBody = tagNameArr[1];
-    var attrObj = {};
-    //Parse all Body lines (max 3) into an array (35 chars max)
-    var tagBodyLines = lineify(tagBody).slice(0,3); //TODO: Do we still need slice?
-    //Parse all Tag Attributes into an object
-    tagInfo.split(" ").slice(1).forEach(function(attr){
-      var key = attr.split("=")[0];
-      var value = attr.split("=")[1].match(/[^\s]+/)[0];
-      attrObj[key] = value;
-    });
-      //create the tag with all info
-      var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
+  try{
+    if(!str) return [];
 
-      if(Array.isArray(tagsArr[i+1])){
-          createdTag.children = masterParser(tagsArr[i+1]);
-          i++;
-      }
-      
-      htmlTree.push(createdTag);
-  };
-  //push to master tags array
-  return htmlTree;
+    var htmlTree =[];
+      //array/string failsafe:
+    var tagsArr = typeof str === 'string' ? parseStr(str) : /*str is actually arr*/str;
+
+    //SINGLE-TAG DATA PARSING
+    for(var i = 0; i < tagsArr.length; i++){
+      var tagName = tagsArr[i].match(/<([\w\d]+)/)[1];
+      var tagNameArr = tagsArr[i].split(">");
+      var tagInfo = tagNameArr[0].replace("<","");
+      var tagBody = tagNameArr[1];
+      var attrObj = {};
+      //Parse all Body lines (max 3) into an array (35 chars max)
+      var tagBodyLines = lineify(tagBody)//.slice(0,3); //TODO: Do we still need slice?
+      //Parse all Tag Attributes into an object
+      tagInfo.split(" ").slice(1).forEach(function(attr){
+        var key = attr.split("=")[0];
+        var value = attr.split("=")[1].match(/[^\s]+/)[0];
+        attrObj[key] = value;
+      });
+        //create the tag with all info
+        var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
+
+        if(Array.isArray(tagsArr[i+1])){
+            createdTag.children = masterParser(tagsArr[i+1]);
+            i++;
+        }
+
+        htmlTree.push(createdTag);
+    };
+    //push to master tags array
+    return htmlTree;
+  }
+  catch(e){
+    console.error(e)
+    return 0;
+    }
 };
 
 function lineify(string, max, _n){
@@ -90,6 +96,7 @@ function lineify(string, max, _n){
   while(string[0] === " "){
     string = string.slice(1);
   }
+  string = string.replace(/\n/g,"");
   var limit = max || 35;
   var result = [];
   //takes a string and returns an array, +
@@ -128,7 +135,6 @@ function treeify(arr, _level){
         if(result[i][0] === "|") result[i] = result[i].slice(0,1).replace("|", " ") + result[i].slice(1);
         else break;
     }
-    console.log(result);
     result = result.filter(function(item){return !!item});
     return _level ? result : result.join("\n");
 }
@@ -158,4 +164,11 @@ var baseCase2A = masterParser(baseCase2);
 var testA = masterParser(test);
 var test2A = masterParser(test2);
 
-$('')
+var $output = $('#output');
+var $input = $('#text-editor');
+function evaluateTheHTML(){
+    if($input.val()) $output.val((treeify(masterParser($input.val())))||"Something's up with yo markup...");
+}
+
+$('#text-editor').on('keypress', evaluateTheHTML)
+setInterval(evaluateTheHTML,100);
