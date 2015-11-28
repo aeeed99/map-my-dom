@@ -30,7 +30,7 @@ var s = "<span></span><span></span>";
 var Tag = function(tagName, body, isBlock, attributes){
   this.tagName = tagName;
   this.body = body;
-  this.isBlock = isBlock;
+  this.isBlock = true; //always true, but code might break if taken out right now.
   if(!attributes) this.attributes = {};
   else this.attributes = attributes;
   if(isBlock) this.children = [];
@@ -52,6 +52,7 @@ HTMLParser.prototype.parse = masterParser;
 function masterParser(str){
   try{
     if(!str) return [];
+    str = typeof str === 'string' ? str.replace(/\n/g,"") : str;
 
     var htmlTree =[];
       //array/string failsafe:
@@ -59,13 +60,20 @@ function masterParser(str){
 
     //SINGLE-TAG DATA PARSING
     for(var i = 0; i < tagsArr.length; i++){
-      var tagName = tagsArr[i].match(/<([\w\d]+)/)[1];
-      var tagNameArr = tagsArr[i].split(">");
-      var tagInfo = tagNameArr[0].replace("<","");
-      var tagBody = tagNameArr[1];
+      var error = Array.isArray(tagsArr[i]) ? true : false;
+        // A correctly given HTML should never have an Array as in index in this part
+        // of the iteration. Doing so means there is an unclosed tag. an !ERROR! node
+        // will be created in the subsequent variables for Tag constrution. Otherwise,
+        // standard Tag construction takes place.
+      var tagName = error ? "!ERROR!" : tagsArr[i].match(/<([\w\d]+)/)[1];
+      var tagNameArr = error ? null : tagsArr[i].split(">");
+      var tagInfo = error ? "" : tagNameArr[0].replace("<","");
+      var tagBody = error ? "***There is probably an unclosed tag around here***" : tagNameArr[1];
       var attrObj = {};
+        
       //Parse all Body lines (max 3) into an array (35 chars max)
-      var tagBodyLines = lineify(tagBody)//.slice(0,3); //TODO: Do we still need slice?
+      var tagBodyLines = lineify(tagBody);
+      
       //Parse all Tag Attributes into an object
       tagInfo.split(" ").slice(1).forEach(function(attr){
         var key = attr.split("=")[0];
@@ -79,7 +87,6 @@ function masterParser(str){
             createdTag.children = masterParser(tagsArr[i+1]);
             i++;
         }
-
         htmlTree.push(createdTag);
     };
     //push to master tags array
@@ -87,7 +94,7 @@ function masterParser(str){
   }
   catch(e){
     console.error(e)
-    return 0;
+    return 0; //This is the value we look for to send a fun error message to the output.
     }
 };
 
@@ -105,13 +112,16 @@ function lineify(string, max, _n){
   if(string.length < limit + 1) return [string];
   else {
     var thisLine;
-    for(var i = limit; true; i--){
+    for(var i = limit; i > 0; i--){
       if(string[i] === " ") {
         result.push(string.substr(0,i));
         if(count === 3) return result + "...";
         else return result.concat(lineify(string.substr(i), limit, count+1));
       }
     }
+    //if we get to here, word is larger than limit chars. Cut off word instead.
+    if(count === 3) return result + "...";
+    return result.concat(lineify(string.substr(limit), limit, count+1));
   }
 }
 
@@ -135,8 +145,20 @@ function treeify(arr, _level){
         if(result[i][0] === "|") result[i] = result[i].slice(0,1).replace("|", " ") + result[i].slice(1);
         else break;
     }
+    //clean up trailing beams
+    for(var i = result.length - 1; i > 0; i--){
+        debugger;
+        var line = result[i];
+        if (/[|\s]/.test(line.lastChar())) result[i] = line.slice(0, -1) + " ";
+        else break;
+    }
+    if(!level && result.every(function(node){return /^\W/.test(node)})) result = result.map(function(node){return node.slice(3)});
     result = result.filter(function(item){return !!item});
-    return _level ? result : result.join("\n");
+    return _level ? result : result.join("\n"); //only joins on the final iteration, this essentially takes it from 'array' from to 'ascii' form
+}
+//helper String method for treeify
+String.prototype.lastChar = function(){
+  return this[this.length - 1];
 }
 
 function displayTree(arr, useParser){
@@ -166,9 +188,11 @@ var test2A = masterParser(test2);
 
 var $output = $('#output');
 var $input = $('#text-editor');
+
 function evaluateTheHTML(){
     if($input.val()) $output.val((treeify(masterParser($input.val())))||"Something's up with yo markup...");
 }
 
-$('#text-editor').on('keypress', evaluateTheHTML)
-setInterval(evaluateTheHTML,100);
+$('#text-editor').on('keypress', evaluateTheHTML);
+
+//setInterval(evaluateTheHTML,100);

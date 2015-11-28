@@ -1,8 +1,22 @@
-There's something wrong with this:
+==========
+11.28.15
+----------
+  STATUS: Open - Warning.
+  AT: script.js:101-124.
+  PROBLEM: lineify does not add extra lines when a word of chars greater than `limit` is given.
+  SOLUTION: n/a
 
-<html>
-<head>
-<this>filler?</this>
-</head>
-<body>
-</html>
+==========
+11.27.15
+----------
+  STATUS: Closed - Solved.
+  PROBLEM: Error thrown with the following text:
+    <html>
+    <head>
+    <this>filler?</this>
+    </head>
+    <body>
+    </html>
+  SOLUTION: this was incorrectly formatted html (extra opening tag in body). Created a new scenerio that checks for this and returns an ERROR node
+            this allows most of the DOM to be rendered correctly and a word of caution in an area that isn't.
+==========
