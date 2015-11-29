@@ -1,6 +1,25 @@
 ==========
 11.28.15
 ----------
+  STATUS: Open - Bug
+  PROBLEM: Cannot parse and/or render multiple children with the same parent
+  EXAMPLE: <html>
+            <div>
+              The first child
+            </div>
+            <div>
+              The second child
+            </div>
+            <div>
+              The Third child.
+            </div>
+            </html>
+  SOLUTION: n/a.
+  NOTES: Run the test case. Children with children seem to be rendered ok, it's children WITH children that might have problems....
+
+==========
+11.28.15
+----------
   STATUS: Open - Warning.
   AT: script.js:101-124.
   PROBLEM: lineify does not add extra lines when a word of chars greater than `limit` is given.

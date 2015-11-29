@@ -1,3 +1,7 @@
+var $output = $('#output');
+var $input = $('#text-editor');
+
+
 function parseStr(str){
     //USED INSIDE MASTERPARSER TO CHANGE STRING INTO ARR FOR TAG PARSING.
     var arr = typeof str === 'string' ? htmlToArray(str): str;
@@ -40,9 +44,14 @@ Tag.prototype.addChild = function(child) {
   if(this.children !== null) this.children.push(child);
   else throw new Error("Cannot add children to inline objects (set isBlock to 'true')");
 }
-Tag.prototype.showInfo = function() {
+Tag.prototype.showInfo = function(level) {
     var result = "";
-    result += this.tagName + '~"' + this.body.join("\n") + '"';
+    result += this.tagName;
+    if(this.attributes.id) result += "#" + this.attributes.id;
+    if(this.attributes.class) result = "." + this.attributes.class;
+
+    var offset = result.length + 1; //for aligning multiple body lines.
+    if(this.body) result += '~"' + this.body.join("\n"+repeatStr ("|  ", level-1) + ":" + repeatStr(" ", offset)) + '"';
     return result;
 }
 
@@ -133,21 +142,20 @@ function treeify(arr, _level){
     for(var i = 0; i < arr.length; i++){
         var tag = arr[i];
         if(tag.children.length){
-            result.push(repeatStr("|  ", level) + "+--" + tag.showInfo());
+            result.push(repeatStr("|  ", level) + "+--" + tag.showInfo(level));
             result.push("|" + repeatStr("  |", level+1), "|" + repeatStr("  |", level+1));
             result = result.concat(treeify(tag.children, (level+1)));
         } else {
-            result.push(repeatStr("|  ", level) + tag.showInfo());
+            result.push(repeatStr("|  ", level) + tag.showInfo(level));
             result.push("|" + repeatStr("  |", level), "|" + repeatStr("  |", level));
         }
     }
     for(var i = result.length - 1; i > 0; i--){
-        if(result[i][0] === "|") result[i] = result[i].slice(0,1).replace("|", " ") + result[i].slice(1);
+        if(result[i][0] === "|") result[i] = " " + result[i].slice(1);
         else break;
     }
     //clean up trailing beams
     for(var i = result.length - 1; i > 0; i--){
-        debugger;
         var line = result[i];
         if (/[|\s]/.test(line.lastChar())) result[i] = line.slice(0, -1) + " ";
         else break;
@@ -186,13 +194,16 @@ var baseCase2A = masterParser(baseCase2);
 var testA = masterParser(test);
 var test2A = masterParser(test2);
 
-var $output = $('#output');
-var $input = $('#text-editor');
-
+//DOM implimentation
 function evaluateTheHTML(){
-    if($input.val()) $output.val((treeify(masterParser($input.val())))||"Something's up with yo markup...");
+    if($input.val()) {
+        var result = (treeify(masterParser($input.val())))||"Something's up with yo markup...";
+        $output.val(result);
+        if(result === "Something's up with yo markup...") $output.addClass('error');
+        else $output.removeClass('error');
+    }
 }
 
 $('#text-editor').on('keypress', evaluateTheHTML);
 
-//setInterval(evaluateTheHTML,100);
+setInterval(evaluateTheHTML,100);
