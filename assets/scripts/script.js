@@ -1,10 +1,12 @@
 var $output = $('#output');
 var $input = $('#text-editor');
 
-
+//parsing functions
 function parseStr(str){
+    debugger;
     //USED INSIDE MASTERPARSER TO CHANGE STRING INTO ARR FOR TAG PARSING.
-    var arr = typeof str === 'string' ? htmlToArray(str): str;
+    //comment remover
+    var arr = (typeof str === 'string' ? htmlToArray(str): str).filter(function(el){return !/<![^-]{2}/.test(el)});
     var result = [];
     for(var i = 0; i < arr.length; i++){
         //Open Tag Case:
@@ -22,6 +24,8 @@ function parseStr(str){
     }
     return result;
 }
+
+
 function htmlToArray(str){
     var arr = str.match(/<\/[^>]+>|<[^>]*>[^<]*/g).filter(function(i){
         return !!i;
@@ -48,7 +52,7 @@ Tag.prototype.showInfo = function(level) {
     var result = "";
     result += this.tagName;
     if(this.attributes.id) result += "#" + this.attributes.id;
-    if(this.attributes.class) result = "." + this.attributes.class;
+    if(this.attributes.class) result += "." + this.attributes.class;
 
     var offset = result.length + 1; //for aligning multiple body lines.
     if(this.body) result += '~"' + this.body.join("\n"+repeatStr ("|  ", level-1) + ":" + repeatStr(" ", offset)) + '"';
@@ -82,6 +86,11 @@ function masterParser(str){
         
       //Parse all Body lines (max 3) into an array (35 chars max)
       var tagBodyLines = lineify(tagBody);
+      
+      //remove spaces used inside quotes.
+      tagInfo = tagInfo.replace(/(")(\\"|\\\\|[^"\\]*)(")/g, function(match,p1,p2,p3){
+        return /*p1 +*/ p2.split(" ")[0] /*+ p3*/; //removing p1 and p3 essentially takes out quotes when rendering(just pure attribute shown)
+      });
       
       //Parse all Tag Attributes into an object
       tagInfo.split(" ").slice(1).forEach(function(attr){

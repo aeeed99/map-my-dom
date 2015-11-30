@@ -1,4 +1,24 @@
 ==========
+11.29.15
+----------
+  STATUS: Closed - Solved
+  PROBLEM: Cannot parse multiple classes.
+  EXAMPLE: <div class="class1 class2 class3">hello</div>m</div>
+  SOLUTION: regex expanded to find all spaces within quotes in tag attributes, and returns only the first/
+  NOTES: This does not allow parsing of multiple classes and this feature might want to be extended later.
+==========
+11.29.15
+----------
+  STATUS: Open - Error
+  PROBLEM: Cannot parse children from a parent with anonymous text.
+  EXAMPLE:
+    <div>There is a lot of text in this one, enought to have three lines I would say.
+      <div>Here is a child parent. this should be no problem</div>
+    </div>
+  NOTES: Might want to try running through parseStr
+  SOLUTION: n/a;
+
+==========
 11.28.15
 ----------
   STATUS: Open - Bug
