@@ -280,4 +280,4 @@ function evaluateTheHTML(){
 
 $('#text-editor').on('keypress', evaluateTheHTML);
 
-//setInterval(evaluateTheHTML,100);
+setInterval(evaluateTheHTML,100);
