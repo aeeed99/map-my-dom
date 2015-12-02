@@ -19,7 +19,8 @@ function parseStr(str){
             if(/^<\//.test(arr[i])) continue;
             var childArr = parseStr(arr.slice(i));
             result.push(childArr);
-            i += (childArr.length);
+            var size = childArr.length
+            i += size % 2 === 0 ? size : size+1;
         }
     }
     return result;
@@ -55,7 +56,7 @@ Tag.prototype.showInfo = function(level) {
     if(this.attributes.class) result += "." + this.attributes.class;
 
     var offset = result.length + 1; //for aligning multiple body lines.
-    if(this.body) result += '~"' + this.body.join("\n"+repeatStr ("|  ", level-1) + ":" + repeatStr(" ", offset)) + '"';
+    if(this.body[0].length) result += '~"' + this.body.join("\n"+repeatStr ("|  ", level-1) + ":" + repeatStr(" ", offset)) + '"';
     return result;
 }
 
@@ -99,6 +100,7 @@ function masterParser(str){
         attrObj[key] = value;
       });
         //create the tag with all info
+        debugger;
         var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
 
         if(Array.isArray(tagsArr[i+1])){
@@ -117,6 +119,7 @@ function masterParser(str){
 };
 
 function lineify(string, max, _n){
+    string = string.replace(/(\s)\s+/g, function(match,p1,p2){return p1}).replace(/\s$/,"");
   var count = _n || 1;
   while(string[0] === " "){
     string = string.slice(1);
@@ -126,7 +129,7 @@ function lineify(string, max, _n){
   var result = [];
   //takes a string and returns an array, +
   //each index representing a "line"
-  //for paragraph formatting.
+  //for paragraph formatting
   if(string.length < limit + 1) return [string];
   else {
     var thisLine;
@@ -163,15 +166,19 @@ function treeify(arr, _level){
         if(result[i][0] === "|") result[i] = " " + result[i].slice(1);
         else break;
     }
-    //clean up trailing beams
-    for(var i = result.length - 1; i > 0; i--){
-        var line = result[i];
-        if (/[|\s]/.test(line.lastChar())) result[i] = line.slice(0, -1) + " ";
-        else break;
-    }
+    //clean up trailing beams -- MOVING TO ITS OWN FUNCtION
     if(!level && result.every(function(node){return /^\W/.test(node)})) result = result.map(function(node){return node.slice(3)});
     result = result.filter(function(item){return !!item});
-    return _level ? result : result.join("\n"); //only joins on the final iteration, this essentially takes it from 'array' from to 'ascii' form
+    return _level ? result : cleanUp(result, 0).join("\n"); //only joins on the final iteration, this essentially takes it from 'array' from to 'ascii' form
+}
+function cleanUp(treeifiedStr, maxLevel){
+    for(var i = maxLevel; i >= 0; i--)
+        for(var j = treeifiedStr.length - 1; j > 0; j--){
+            var line = treeifiedStr[j];
+            if (/[|\s]/.test(line[0])) treeifiedStr[j] = line.slice(0, -1) + " ";
+            else break;
+    }
+    return treeifiedStr;
 }
 //helper String method for treeify
 String.prototype.lastChar = function(){
@@ -215,4 +222,4 @@ function evaluateTheHTML(){
 
 $('#text-editor').on('keypress', evaluateTheHTML);
 
-setInterval(evaluateTheHTML,100);
+//setInterval(evaluateTheHTML,100);
