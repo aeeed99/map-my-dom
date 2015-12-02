@@ -172,12 +172,12 @@ function treeify(arr, _level){
 //                result.push("|", "|");
 //                result = result.concat(treeify(tag.children, (level+1)));
 //            } else {
-                result.push(repeatStr("|  ", level) + "+--" + tag.showInfo(level));
+                result = result.concat((repeatStr("|  ", level) + "+--" + tag.showInfo(level)).split('\n'));
                 result.push("|" + repeatStr("  |", level+1), "|" + repeatStr("  |", level+1));
                 result = result.concat(treeify(tag.children, (level+1)));
 //            }
         } else {
-            result.push(repeatStr("|  ", level) + tag.showInfo(level));
+            result = result.concat((repeatStr("|  ", level) + tag.showInfo(level)).split('\n'));
             result.push("|" + repeatStr("  |", level), "|" + repeatStr("  |", level));
         }
     }
