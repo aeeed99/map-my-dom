@@ -5,7 +5,7 @@ var $input = $('#text-editor');
 function parseStr(str){
     //USED INSIDE MASTERPARSER TO CHANGE STRING INTO ARR FOR TAG PARSING.
     //comment remover
-    var arr = (typeof str === 'string' ? htmlToArray(str): str).filter(function(el){return !/<![^-]{2}/.test(el)});
+    var arr = (typeof str === 'string' ? htmlToArray(str): str);//.filter(function(el){return !/<![^-]{2}/.test(el)});
     var result = [];
     for(var i = 0; i < arr.length; i++){
         //Open Tag Case:
@@ -64,7 +64,7 @@ Tag.prototype.showInfo = function(level) {
     if(this.attributes.class) result += "." + this.attributes.class;
 
     var offset = result.length + 1; //for aligning multiple body lines.
-    if(this.body[0].length) result += '~"' + this.body.join("\n"+repeatStr ("|  ", level-1) + ":" + repeatStr(" ", offset)) + '"';
+    if(this.body[0].length) result += '~"' + this.body.join("\n"+repeatStr ("   ", level) + ":" + repeatStr(" ", offset)) + '"';
     return result;
 }
 
@@ -108,7 +108,6 @@ function masterParser(str){
         attrObj[key] = value;
       });
         //create the tag with all info
-        debugger;
         var createdTag = new Tag(tagName, tagBodyLines, /*always true*/true, attrObj);
 
         if(Array.isArray(tagsArr[i+1])){
@@ -158,32 +157,82 @@ function treeify(arr, _level){
 //    if(useParser) arr = masterParser(arr); --to be removed; treeify should only be called with arrays of Tags already returned from masterParser
     var level = _level || 0;
     var result = [];
+    var maxLevel = 0;
+    
+    //base case (one tag no children): if this is triggered, I'm not sure why you're using this...
+    if(arr.every(function(tag){return !tag.children.legth})){
+       console.log("no children :)");
+       }
     
     for(var i = 0; i < arr.length; i++){
         var tag = arr[i];
         if(tag.children.length){
-            result.push(repeatStr("|  ", level) + "+--" + tag.showInfo(level));
-            result.push("|" + repeatStr("  |", level+1), "|" + repeatStr("  |", level+1));
-            result = result.concat(treeify(tag.children, (level+1)));
+//            if(level === 0){
+//                result.push(tag.showInfo());
+//                result.push("|", "|");
+//                result = result.concat(treeify(tag.children, (level+1)));
+//            } else {
+                result.push(repeatStr("|  ", level) + "+--" + tag.showInfo(level));
+                result.push("|" + repeatStr("  |", level+1), "|" + repeatStr("  |", level+1));
+                result = result.concat(treeify(tag.children, (level+1)));
+//            }
         } else {
             result.push(repeatStr("|  ", level) + tag.showInfo(level));
             result.push("|" + repeatStr("  |", level), "|" + repeatStr("  |", level));
         }
     }
-    for(var i = result.length - 1; i > 0; i--){
-        if(result[i][0] === "|") result[i] = " " + result[i].slice(1);
-        else break;
-    }
+//    for(var i = result.length - 1; i > 0; i--){
+//        if(result[i][0] === "|") result[i] = " " + result[i].slice(1);
+//        else break;
+//    }
     //clean up trailing beams -- MOVING TO ITS OWN FUNCtION
-    if(!level && result.every(function(node){return /^\W/.test(node)})) result = result.map(function(node){return node.slice(3)});
+    //if(!level && result.every(function(node){return /^\W/.test(node)})) result = result.map(function(node){return node.slice(3)});
     result = result.filter(function(item){return !!item});
-    return _level ? result : cleanUp(result, 0).join("\n"); //only joins on the final iteration, this essentially takes it from 'array' from to 'ascii' form
+    var max = result.reduce(function(prev, line){
+        var beams = (line.match(/\|/g)||0).length;
+        return beams > prev ? beams : prev},0) + 5;
+    console.log("MAX: ", max);
+    return _level ? cleanUpAndConnect(result, level) : cleanUpAndConnect(result, level).join("\n"); //only joins on the final iteration, this essentially takes it from 'array' from to 'ascii' form
+}
+
+function cleanUpLevel(treeifiedStr, level){
+    var pos = level * 3 //outerloop var, corresponding to level.
+    for(var j = treeifiedStr.length - 1; j > 0; j--){
+            var line = treeifiedStr[j];
+            if(!line[pos]) continue;
+            if (/[|\s]/.test(line[pos])) treeifiedStr[j] = line.slice(0, pos) + " " + line.slice(pos+1);
+            else break;
+    }
+    return treeifiedStr;
+}
+
+function cleanUpAndConnect(treeifiedStr, level){
+    debugger;
+    return connectLevel(cleanUpLevel(treeifiedStr, level), level);
+}
+
+function connectLevel(treeifiedStr, level){
+    //helper function to connect whhere multi-line text (from showInfo()) gets cut off
+    for(var i = level; i >= 0;i--){
+        var startConnecting = false;
+        var pos = i * 3;
+        for(var j = treeifiedStr.length - 1; j >= 0; j--){
+            var line = treeifiedStr[j];
+            if(startConnecting && line[pos] === " ") 
+                treeifiedStr[j] = line.slice(0, pos) + "|" + line.slice(pos+1);
+            if(line[pos] !== " ") startConnecting = true;
+        }
+    }
+    return treeifiedStr;
 }
 function cleanUp(treeifiedStr, maxLevel){
+    //helper for treeify
     for(var i = maxLevel; i >= 0; i--)
         for(var j = treeifiedStr.length - 1; j > 0; j--){
             var line = treeifiedStr[j];
-            if (/[|\s]/.test(line[0])) treeifiedStr[j] = line.slice(0, -1) + " ";
+            var pos = i * 3 //outerloop var, corresponding to level.
+            if(!line[pos]) continue;
+            if (/[|\s]/.test(line[pos])) treeifiedStr[j] = line.slice(0, pos) + " " + line.slice(pos+1);
             else break;
     }
     return treeifiedStr;
@@ -221,7 +270,8 @@ var test2A = masterParser(test2);
 //DOM implimentation
 function evaluateTheHTML(){
     if($input.val()) {
-        var result = (treeify(masterParser($input.val())))||"Something's up with yo markup...";
+        var result = (treeify(masterParser($input.val().replace(/<!--(.|\n)*-->|<!.*>|<link.*>|<script.*>/g,""))))||"Something's up with yo markup...";
+        result = cleanUpLevel(result, 1);
         $output.val(result);
         if(result === "Something's up with yo markup...") $output.addClass('error');
         else $output.removeClass('error');
