@@ -3,7 +3,6 @@ var $input = $('#text-editor');
 
 //parsing functions
 function parseStr(str){
-    debugger;
     //USED INSIDE MASTERPARSER TO CHANGE STRING INTO ARR FOR TAG PARSING.
     //comment remover
     var arr = (typeof str === 'string' ? htmlToArray(str): str).filter(function(el){return !/<![^-]{2}/.test(el)});
@@ -19,9 +18,18 @@ function parseStr(str){
             if(/^<\//.test(arr[i])) continue;
             var childArr = parseStr(arr.slice(i));
             result.push(childArr);
-            var size = childArr.length
-            i += size % 2 === 0 ? size : size+1;
+            var offset = flattenAndCount(childArr) * 2;
+            i += offset;
         }
+    }
+    return result;
+}
+function flattenAndCount(arr){
+    //helper function for getting the correct offset in (grand)child parsing.
+    var result = 0;
+    for(var i = 0; i < arr.length; i++){
+        if(Array.isArray(arr[i])) result += flattenAndCount(arr[i]);
+        else result++;
     }
     return result;
 }
