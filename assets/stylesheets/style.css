@@ -60,6 +60,13 @@ textarea#output.error{
 #container {
     margin: 0 auto;
 }
+.github-btns {
+    margin: 20px auto 0 auto;
+    display: block;
+}
+.github-btns > span{
+    margin: 0 10px;
+}
 
 /*Begin placeholder styles */
 ::-webkit-input-placeholder, :-moz-placeholder, ::-moz-placeholder, :-ms-input-placeholder {
