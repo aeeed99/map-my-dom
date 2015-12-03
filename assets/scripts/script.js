@@ -270,7 +270,7 @@ var test2A = masterParser(test2);
 //DOM implimentation
 function evaluateTheHTML(){
     if($input.val()) {
-        var result = (treeify(masterParser($input.val().replace(/<!--(.|\n)*-->|<!.*>|<link.*>|<script.*>/g,""))))||"Something's up with yo markup...";
+        var result = (treeify(masterParser($input.val().replace(/<!--(.|\n)*-->|<!.*>|<link.*>|<script.*>|<meta.*>/g,""))))||"Something's up with yo markup...";
         result = cleanUpLevel(result, 1);
         $output.val(result);
         if(result === "Something's up with yo markup...") $output.addClass('error');
@@ -280,4 +280,4 @@ function evaluateTheHTML(){
 
 $('#text-editor').on('keypress', evaluateTheHTML);
 
-setInterval(evaluateTheHTML,100);
+setInterval(evaluateTheHTML, 100);
