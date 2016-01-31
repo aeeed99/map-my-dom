@@ -108,10 +108,11 @@ function masterParser(str) {
         //take out tag name;
         tagInfo = (tagInfo.match(/^\s*\S+\s+(.+)/) || ['',''])[1];
         console.log('TAG INFO AFTER :', tagInfo, "\nbool:", !!tagInfo);
-        if(tagInfo) tagInfo.split(" ").slice(1).forEach(function (attr) {
-            console.log("ENTERED IF STATEMENT ATTR", attr);
-            var key = attr.split("=")[0];
-            var value = (attr.split("=")[1] || "").match(/[^\s]+/)[0];
+        if(tagInfo) tagInfo.match(/\S+/g).forEach(function (attr) {
+            var keyValuePair = attr.split("=");
+            console.log('THE PAIR', keyValuePair);
+            var key = keyValuePair[0];
+            var value = ( (keyValuePair[1] || "").match(/[^\s]+/) || [""])[0].replace(/^["']["']$/,"");
             attrObj[key] = value;
         });
         //create the tag with all info
@@ -288,4 +289,4 @@ function evaluateTheHTML() {
 
 $('#text-editor').on('keypress', evaluateTheHTML);
 
-//setInterval(evaluateTheHTML, 100);
+setInterval(evaluateTheHTML, 100);
