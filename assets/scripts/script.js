@@ -106,8 +106,10 @@ function masterParser(str) {
         //Parse all Tag Attributes into an object
         console.log("TAG INFO", tagInfo);
         //take out tag name;
-        tagInfo.split(" ").slice(1).forEach(function (attr) {
-            console.log("ATTR", attr);
+        tagInfo = (tagInfo.match(/^\s*\S+\s+(.+)/) || ['',''])[1];
+        console.log('TAG INFO AFTER :', tagInfo, "\nbool:", !!tagInfo);
+        if(tagInfo) tagInfo.split(" ").slice(1).forEach(function (attr) {
+            console.log("ENTERED IF STATEMENT ATTR", attr);
             var key = attr.split("=")[0];
             var value = (attr.split("=")[1] || "").match(/[^\s]+/)[0];
             attrObj[key] = value;
